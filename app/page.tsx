@@ -34,6 +34,12 @@ interface ShoppingListItem {
   }[];
 }
 
+interface NewIngredient {
+  ingredient: string;
+  day: string;
+  recipe: string;
+}
+
 const DAYS = [
   "Lundi",
   "Mardi",
@@ -58,6 +64,12 @@ export default function Home() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [shoppingList, setShoppingList] = useState<ShoppingListItem[]>([]);
   const [showShoppingList, setShowShoppingList] = useState(false);
+  const [showAddIngredient, setShowAddIngredient] = useState(false);
+  const [newIngredient, setNewIngredient] = useState<NewIngredient>({
+    ingredient: '',
+    day: DAYS[0],
+    recipe: 'Ajout manuel'
+  });
 
   useEffect(() => {
     const savedRecipes = localStorage.getItem("recipes");
@@ -225,10 +237,59 @@ export default function Home() {
     pdf.save("liste-de-courses.pdf");
   };
 
+  const addCustomIngredient = () => {
+    if (!newIngredient.ingredient.trim()) return;
+    
+    setShoppingList(list => [...list, {
+      ingredient: newIngredient.ingredient,
+      checked: false,
+      occurrences: [{
+        day: newIngredient.day,
+        recipe: newIngredient.recipe
+      }]
+    }]);
+    
+    setNewIngredient({
+      ingredient: '',
+      day: DAYS[0],
+      recipe: 'Ajout manuel'
+    });
+    setShowAddIngredient(false);
+  };
+
+  // Ajouter les fonctions de contrôle
+  const incrementIngredient = (index: number) => {
+    setShoppingList(list => list.map((item, i) => {
+      if (i === index) {
+        return {
+          ...item,
+          occurrences: [...item.occurrences, item.occurrences[0]]
+        };
+      }
+      return item;
+    }));
+  };
+
+  const decrementIngredient = (index: number) => {
+    setShoppingList(list => list.map((item, i) => {
+      if (i === index && item.occurrences.length > 1) {
+        return {
+          ...item,
+          occurrences: item.occurrences.slice(0, -1)
+        };
+      }
+      return item;
+    }));
+  };
+
+  const deleteIngredient = (index: number) => {
+    setShoppingList(list => list.filter((_, i) => i !== index));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-violet-50">
-      <header className="bg-gradient-to-r from-indigo-600 to-violet-600 p-6 shadow-lg">
-        <div className="w-full max-w-[98%] mx-auto flex justify-between items-center">
+      <header className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 sm:p-6 shadow-lg">
+        <div className="w-full max-w-[98%] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -294,13 +355,13 @@ export default function Home() {
               </div>
             </DialogContent>
           </Dialog>
-          <h1 className="text-4xl font-bold text-white font-serif tracking-wide">Plan Repas</h1>
-          <div className="w-[180px]"></div>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif tracking-wide order-first sm:order-none">Plan Repas</h1>
+          <div className="w-full sm:w-[180px]"></div>
         </div>
       </header>
 
-      <main className="w-full max-w-[98%] mx-auto p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-7 gap-3">
+      <main className="w-full max-w-[98%] mx-auto p-2 sm:p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3">
           {weekPlan.map((plan, index) => (
             <Card key={plan.day} className={`p-3 shadow-lg hover:shadow-xl transition-all bg-white border-2 border-indigo-200`}>
               <h2 className="text-xl font-bold mb-4 text-indigo-900 border-b-2 border-indigo-200 pb-2">{plan.day}</h2>
@@ -374,12 +435,12 @@ export default function Home() {
         </div>
 
         {showShoppingList && (
-          <Card className="mt-8 p-6 border-indigo-100 shadow-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-indigo-900">Liste de courses</h2>
+          <Card className="mt-8 p-4 sm:p-6 border-indigo-100 shadow-md">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900">Liste de courses</h2>
               <Button
                 onClick={downloadShoppingList}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all"
+                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all"
               >
                 <FileDown className="mr-2 h-4 w-4" />
                 Télécharger en PDF
@@ -387,22 +448,91 @@ export default function Home() {
             </div>
             <div className="space-y-4">
               {shoppingList.map((item, index) => (
-                <div key={index} className="flex items-center space-x-4">
-                  <Checkbox
-                    checked={item.checked}
-                    onCheckedChange={() => toggleIngredientCheck(index)}
-                  />
-                  <span className={`flex-grow ${item.checked ? "line-through text-gray-400" : ""}`}>
-                    {item.ingredient}
-                  </span>
-                  <span className="text-sm text-indigo-600 font-medium">
-                    {item.occurrences.length > 1 ? `×${item.occurrences.length}` : ""}
-                  </span>
-                  <span className="text-sm text-gray-500 whitespace-nowrap">
+                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 p-2 border rounded-lg border-gray-100">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <Checkbox
+                      checked={item.checked}
+                      onCheckedChange={() => toggleIngredientCheck(index)}
+                    />
+                    <span className={`flex-grow ${item.checked ? "line-through text-gray-400" : ""}`}>
+                      {item.ingredient}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 ml-8 sm:ml-0">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => decrementIngredient(index)}
+                      disabled={item.occurrences.length <= 1}
+                      className="h-8 w-8 p-0"
+                    >
+                      <span className="text-lg">-</span>
+                    </Button>
+                    <span className="text-sm text-indigo-600 font-medium min-w-[2rem] text-center">
+                      {item.occurrences.length > 1 ? `×${item.occurrences.length}` : ""}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => incrementIngredient(index)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <span className="text-lg">+</span>
+                    </Button>
+                  </div>
+                  <span className="text-sm text-gray-500 whitespace-normal sm:whitespace-nowrap ml-8 sm:ml-0">
                     ({item.occurrences.map(o => `${o.day} - ${o.recipe}`).join(", ")})
                   </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => deleteIngredient(index)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 h-8 w-8 p-0 ml-auto"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
                 </div>
               ))}
+            </div>
+            <div className="mt-6 pt-6 border-t border-indigo-200">
+              {showAddIngredient ? (
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Input
+                      placeholder="Nouvel ingrédient"
+                      value={newIngredient.ingredient}
+                      onChange={(e) => setNewIngredient({...newIngredient, ingredient: e.target.value})}
+                      className="flex-grow"
+                    />
+                    <Select value={newIngredient.day} onValueChange={(value) => setNewIngredient({...newIngredient, day: value})}>
+                      <SelectTrigger className="w-full sm:w-[200px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DAYS.map(day => (
+                          <SelectItem key={day} value={day}>{day}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button onClick={addCustomIngredient} className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white">
+                      Ajouter
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowAddIngredient(false)} className="flex-1 sm:flex-none">
+                      Annuler
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <Button 
+                  onClick={() => setShowAddIngredient(true)}
+                  className="w-full bg-teal-600 hover:bg-teal-700 text-white shadow-md transition-all"
+                >
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Ajouter un ingrédient
+                </Button>
+              )}
             </div>
           </Card>
         )}
