@@ -287,18 +287,14 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-violet-50">
-      <header className="bg-gradient-to-r from-indigo-600 to-violet-600 p-4 sm:p-6 shadow-lg">
-        <div className="w-full max-w-[98%] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-indigo-50 to-violet-50">
+      <header className="bg-gradient-to-r from-indigo-500 to-purple-600 p-4 sm:p-6 shadow-xl backdrop-blur-lg bg-opacity-90 sticky top-0 z-50">
+        <div className="w-full max-w-[95%] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
                 variant="secondary" 
-                className="bg-teal-600 hover:bg-teal-700 text-white shadow-md transition-all"
-                onClick={() => {
-                  setEditingRecipe(null);
-                  setNewRecipe({ name: "", ingredients: [], instructions: "" });
-                }}
+                className="bg-white/90 hover:bg-white text-indigo-600 shadow-lg transition-all hover:scale-105"
               >
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Ajouter une recette
@@ -355,16 +351,20 @@ export default function Home() {
               </div>
             </DialogContent>
           </Dialog>
-          <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif tracking-wide order-first sm:order-none">Plan Repas</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-white font-serif tracking-wide order-first sm:order-none drop-shadow-md">
+            Plan Repas
+          </h1>
           <div className="w-full sm:w-[180px]"></div>
         </div>
       </header>
 
-      <main className="w-full max-w-[98%] mx-auto p-2 sm:p-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-3">
+      <main className="w-full max-w-[95%] mx-auto p-2 sm:p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4">
           {weekPlan.map((plan, index) => (
-            <Card key={plan.day} className={`p-3 shadow-lg hover:shadow-xl transition-all bg-white border-2 border-indigo-200`}>
-              <h2 className="text-xl font-bold mb-4 text-indigo-900 border-b-2 border-indigo-200 pb-2">{plan.day}</h2>
+            <Card key={plan.day} className="p-4 bg-white/80 backdrop-blur-sm hover:bg-white transition-all duration-300 shadow-lg hover:shadow-xl rounded-xl border-0">
+              <h2 className="text-xl font-bold mb-4 text-indigo-900 border-b border-indigo-100/50 pb-2">
+                {plan.day}
+              </h2>
               
               {!plan.selectedRecipe ? (
                 <Select onValueChange={(value) => {
@@ -427,7 +427,7 @@ export default function Home() {
           <Button
             size="lg"
             onClick={generateShoppingList}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all"
+            className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg transition-all hover:scale-105"
           >
             <FileDown className="mr-2 h-5 w-5" />
             Générer la liste de courses
@@ -435,20 +435,22 @@ export default function Home() {
         </div>
 
         {showShoppingList && (
-          <Card className="mt-8 p-4 sm:p-6 border-indigo-100 shadow-md">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-indigo-900">Liste de courses</h2>
+          <Card className="mt-8 p-6 bg-white/80 backdrop-blur-sm rounded-xl border-0 shadow-xl">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+              <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 text-transparent bg-clip-text">
+                Liste de courses
+              </h2>
               <Button
                 onClick={downloadShoppingList}
-                className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all"
+                className="w-full sm:w-auto bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg transition-all hover:scale-105"
               >
                 <FileDown className="mr-2 h-4 w-4" />
                 Télécharger en PDF
               </Button>
             </div>
-            <div className="space-y-4">
+            <div className="space-y-3">
               {shoppingList.map((item, index) => (
-                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 p-2 border rounded-lg border-gray-100">
+                <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 rounded-lg bg-slate-50/50 hover:bg-slate-50 transition-colors">
                   <div className="flex items-center gap-2 w-full sm:w-auto">
                     <Checkbox
                       checked={item.checked}
@@ -494,9 +496,9 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <div className="mt-6 pt-6 border-t border-indigo-200">
+            <div className="mt-8 pt-6 border-t border-indigo-100/50">
               {showAddIngredient ? (
-                <div className="space-y-4">
+                <div className="space-y-4 bg-slate-50/50 p-4 rounded-lg">
                   <div className="flex flex-col sm:flex-row gap-4">
                     <Input
                       placeholder="Nouvel ingrédient"
@@ -527,7 +529,7 @@ export default function Home() {
               ) : (
                 <Button 
                   onClick={() => setShowAddIngredient(true)}
-                  className="w-full bg-teal-600 hover:bg-teal-700 text-white shadow-md transition-all"
+                  className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white shadow-lg transition-all hover:scale-105"
                 >
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Ajouter un ingrédient

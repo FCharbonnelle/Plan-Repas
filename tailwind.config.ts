@@ -78,13 +78,47 @@ const config: Config = {
             height: '0',
           },
         },
+        gradient: {
+          '0%': { opacity: '0.5' },
+          '50%': { opacity: '0.8' },
+          '100%': { opacity: '0.5' },
+        },
+        glow: {
+          '0%': { textShadow: '0 0 10px rgba(99,102,241,0.5)' },
+          '50%': { textShadow: '0 0 20px rgba(99,102,241,0.8), 0 0 30px rgba(99,102,241,0.3)' },
+          '100%': { textShadow: '0 0 10px rgba(99,102,241,0.5)' },
+        },
+        'float-slow': {
+          '0%': { transform: 'translate(0, 0) rotate(0deg)' },
+          '33%': { transform: 'translate(30px, 30px) rotate(5deg)' },
+          '66%': { transform: 'translate(-20px, 50px) rotate(-5deg)' },
+          '100%': { transform: 'translate(0, 0) rotate(0deg)' }
+        },
+        'float-medium': {
+          '0%': { transform: 'translate(0, 0) rotate(0deg)' },
+          '33%': { transform: 'translate(-20px, -30px) rotate(-5deg)' },
+          '66%': { transform: 'translate(40px, -20px) rotate(5deg)' },
+          '100%': { transform: 'translate(0, 0) rotate(0deg)' }
+        },
+        'float-fast': {
+          '0%': { transform: 'translate(0, 0) rotate(0deg)' },
+          '33%': { transform: 'translate(-30px, 20px) rotate(3deg)' },
+          '66%': { transform: 'translate(20px, -10px) rotate(-3deg)' },
+          '100%': { transform: 'translate(0, 0) rotate(0deg)' }
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        gradient: 'gradient 3s infinite',
+        glow: 'glow 2s infinite',
+        'float-slow': 'float-slow 20s infinite',
+        'float-medium': 'float-medium 15s infinite',
+        'float-fast': 'float-fast 12s infinite'
       },
     },
   },
   plugins: [require('tailwindcss-animate')],
 };
 export default config;
+
