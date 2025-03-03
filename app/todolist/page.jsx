@@ -1,6 +1,7 @@
 "use client"
-import { useState } from "react";
-function Header() {
+import { useState, useEffect } from "react";
+function Header(props) {
+    const nombreTachesComplétées = props.nombreTachesComplétées;
     return (
         <header className="bg-gradient-to-r from-blue-900 to-indigo-900 py-8 relative overflow-hidden">
             {/* Effets lumineux d'arrière-plan */}
@@ -9,97 +10,20 @@ function Header() {
                 <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-violet-500/20 rounded-full blur-[100px] animate-pulse delay-700"></div>
             </div>
             <div className="container mx-auto px-4 relative">
-                <h1 className="text-4xl font-bold text-white text-center tracking-wide animate-glow">
+                <h1 className="text-4xl font-bold text-white text-center tracking-wide animate-glow mb-4">
                     To Do List
                 </h1>
+                <div className="flex justify-center">
+                    <div className="bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full 
+                        border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300
+                        hover:scale-105 hover:shadow-blue-500/20">
+                        <p className="text-xl font-semibold text-white tracking-wide animate-glow">
+                            {nombreTachesComplétées} {nombreTachesComplétées <= 1 ? 'tâche complétée' : 'tâches complétées'}
+                        </p>
+                    </div>
+                </div>
             </div>
         </header>
-    )
-}
-function List(props) {
-    const [editingTask, setEditingTask] = useState(null);
-    const [editText, setEditText] = useState("");
-
-    return (
-        <div className="container mx-auto px-4 py-8 relative">
-            {/* Effet de gradient animé */}
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-violet-500/5 animate-gradient"></div>
-            <ul className="space-y-4 relative">
-                {props.taches.map((tache) => (
-                    <li key={tache.nom} 
-                        className="bg-white/90 backdrop-blur rounded-lg p-4 
-                        flex items-center justify-between 
-                        transition-all duration-300 
-                        hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] 
-                        hover:-translate-y-0.5 
-                        hover:bg-gradient-to-r hover:from-white hover:to-blue-50">
-                        <div className="flex items-center space-x-4 flex-1">
-                            <input 
-                                type="checkbox" 
-                                checked={tache.coche} 
-                                onChange={() => props.onToggle(tache.nom)}
-                                className="w-5 h-5 rounded border-blue-500 text-blue-600 
-                                focus:ring-blue-500 transition-shadow
-                                hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                            />
-                            {editingTask === tache.nom ? (
-                                <input 
-                                    type="text"
-                                    value={editText}
-                                    onChange={(e) => setEditText(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "Enter") {
-                                            props.onEdit(tache.nom, editText);
-                                            setEditingTask(null);
-                                        }
-                                        if (e.key === "Escape") {
-                                            setEditingTask(null);
-                                        }
-                                    }}
-                                    className="flex-1 p-2 border border-blue-300 rounded 
-                                    focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                                    shadow-[0_0_10px_rgba(59,130,246,0.1)]
-                                    transition-all duration-300"
-                                    autoFocus
-                                />
-                            ) : (
-                                <span className={`flex-1 text-lg transition-all duration-300 
-                                    ${tache.coche ? 'line-through text-gray-500' : 'text-gray-800'}`}>
-                                    {tache.nom}
-                                </span>
-                            )}
-                        </div>
-                        <div className="flex space-x-2">
-                            {!editingTask && (
-                                <button 
-                                    onClick={() => {
-                                        setEditingTask(tache.nom);
-                                        setEditText(tache.nom);
-                                    }}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded 
-                                    transition-all duration-300
-                                    hover:bg-blue-700 
-                                    hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
-                                    active:transform active:scale-95"
-                                >
-                                    Modifier
-                                </button>
-                            )}
-                            <button 
-                                onClick={() => props.onDelete(tache.nom)}
-                                className="px-4 py-2 bg-red-600 text-white rounded 
-                                transition-all duration-300
-                                hover:bg-red-700 
-                                hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]
-                                active:transform active:scale-95"
-                            >
-                                Supprimer
-                            </button>
-                        </div>
-                    </li>
-                ))}
-            </ul>
-        </div>
     )
 }
 function Addtolist(props) {
@@ -139,8 +63,8 @@ function Addtolist(props) {
                             placeholder-blue-300"
                             placeholder="Entrez une nouvelle tâche..."
                         />
-                        <button 
-                            type="submit" 
+                        <button
+                            type="submit"
                             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-violet-600 
                             text-white font-semibold rounded-lg 
                             transition-all duration-300
@@ -156,22 +80,146 @@ function Addtolist(props) {
         </div>
     )
 }
+function List(props) {
+    const [editingTask, setEditingTask] = useState(null);
+    const [editText, setEditText] = useState("");
+
+    const playCheckSound = () => {
+        const audio = new Audio('Check.mp3');
+        audio.play();
+    };
+
+    const playUncheckSound = () => {
+        const audio = new Audio('Uncheck.mp3');
+        audio.play();
+    };
+
+    return (
+        <div className="container mx-auto px-4 py-8 relative">
+            {/* Effet de gradient animé */}
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-500/5 to-violet-500/5 animate-gradient"></div>
+            <ul className="space-y-4 relative">
+                {props.taches.map((tache) => (
+                    <li key={tache.nom}
+                        className="bg-white/90 backdrop-blur rounded-lg p-4 
+                        flex items-center justify-between 
+                        transition-all duration-300 
+                        hover:shadow-[0_0_20px_rgba(99,102,241,0.3)] 
+                        hover:-translate-y-0.5 
+                        hover:bg-gradient-to-r hover:from-white hover:to-blue-50">
+                        <div className="flex items-center space-x-4 flex-1">
+                            <input
+                                type="checkbox"
+                                checked={tache.coche}
+                                onChange={() => {
+                                    tache.coche ? playUncheckSound() : playCheckSound();
+                                    props.onToggle(tache.nom);
+                                }}
+                                className="w-5 h-5 rounded border-blue-500 text-blue-600 
+                                focus:ring-blue-500 transition-shadow
+                                hover:shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                            />
+                            {editingTask === tache.nom ? (
+                                <input
+                                    type="text"
+                                    value={editText}
+                                    onChange={(e) => setEditText(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            props.onEdit(tache.nom, editText);
+                                            setEditingTask(null);
+                                        }
+                                        if (e.key === "Escape") {
+                                            setEditingTask(null);
+                                        }
+                                    }}
+                                    className="flex-1 p-2 border border-blue-300 rounded 
+                                    focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                                    shadow-[0_0_10px_rgba(59,130,246,0.1)]
+                                    transition-all duration-300"
+                                    autoFocus
+                                />
+                            ) : (
+                                <span className={`flex-1 text-lg transition-all duration-300 
+                                    ${tache.coche ? 'line-through text-gray-500' : 'text-gray-800'}`}>
+                                    {tache.nom}
+                                </span>
+                            )}
+                        </div>
+                        <div className="flex space-x-2">
+                            {!editingTask && (
+                                <button
+                                    onClick={() => {
+                                        setEditingTask(tache.nom);
+                                        setEditText(tache.nom);
+                                    }}
+                                    className="px-4 py-2 bg-blue-600 text-white rounded 
+                                    transition-all duration-300
+                                    hover:bg-blue-700 
+                                    hover:shadow-[0_0_15px_rgba(59,130,246,0.5)]
+                                    active:transform active:scale-95"
+                                >
+                                    Modifier
+                                </button>
+                            )}
+                            <button
+                                onClick={() => props.onDelete(tache.nom)}
+                                className="px-4 py-2 bg-red-600 text-white rounded 
+                                transition-all duration-300
+                                hover:bg-red-700 
+                                hover:shadow-[0_0_15px_rgba(239,68,68,0.5)]
+                                active:transform active:scale-95"
+                            >
+                                Supprimer
+                            </button>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    )
+}
+
 
 export default function Todolist() {
-    const [taches, setTaches] = useState([
-        {
-            nom: "Repasser",
-            coche: true
-        },
-    ]);
+    const [taches, setTaches] = useState([]);
+    const [isInitialized, setIsInitialized] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const savedTaches = localStorage.getItem('todolist-tasks');
+                if (savedTaches) {
+                    setTaches(JSON.parse(savedTaches));
+                }
+                setIsInitialized(true);
+            } catch (error) {
+                console.error('Erreur lors du chargement des tâches:', error);
+                setIsInitialized(true);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!isInitialized) return;
+
+        if (typeof window !== 'undefined') {
+            try {
+                localStorage.setItem('todolist-tasks', JSON.stringify(taches));
+            } catch (error) {
+                console.error('Erreur lors de la sauvegarde des tâches:', error);
+            }
+        }
+
+    }, [taches, isInitialized]);
 
     function handleAddtaches(tache) {
-        setTaches([...taches, {nom: tache, coche: false}]);
+        setTaches([...taches, { nom: tache, coche: false }]);
     }
     function handleEdit(ancienNom, nouveauNom) {
-        setTaches(taches.map(tache => 
+        setTaches(taches.map(tache =>
             tache.nom === ancienNom
-                ? {...tache, nom: nouveauNom}
+                ? { ...tache, nom: nouveauNom }
                 : tache
         ));
     }
@@ -180,9 +228,9 @@ export default function Todolist() {
     }
 
     function handleToggle(nomTache) {
-        setTaches(taches.map(tache => 
-            tache.nom === nomTache 
-                ? {...tache, coche: !tache.coche}
+        setTaches(taches.map(tache =>
+            tache.nom === nomTache
+                ? { ...tache, coche: !tache.coche }
                 : tache
         ));
     }
@@ -208,10 +256,10 @@ export default function Todolist() {
                 </div>
             </div>
 
-            <Header />
+            <Header nombreTachesComplétées={taches.filter(tache => tache.coche).length} />
             <main className="py-8 relative z-10">
-                <List taches={taches} onToggle={handleToggle} onEdit={handleEdit} onDelete={handleDelete} />
                 <Addtolist setTaches={handleAddtaches} />
+                <List taches={taches} onToggle={handleToggle} onEdit={handleEdit} onDelete={handleDelete} />
             </main>
         </div>
     );

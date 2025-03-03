@@ -88,6 +88,20 @@ const config: Config = {
           '50%': { textShadow: '0 0 20px rgba(99,102,241,0.8), 0 0 30px rgba(99,102,241,0.3)' },
           '100%': { textShadow: '0 0 10px rgba(99,102,241,0.5)' },
         },
+        text: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center'
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center'
+          }
+        },
+        'slide-up': {
+          '0%': { transform: 'translateY(100%)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        },
         'float-slow': {
           '0%': { transform: 'translate(0, 0) rotate(0deg)' },
           '33%': { transform: 'translate(30px, 30px) rotate(5deg)' },
@@ -112,6 +126,8 @@ const config: Config = {
         'accordion-up': 'accordion-up 0.2s ease-out',
         gradient: 'gradient 3s infinite',
         glow: 'glow 2s infinite',
+        text: 'text 5s ease infinite',
+        'slide-up': 'slide-up 0.3s ease-out',
         'float-slow': 'float-slow 20s infinite',
         'float-medium': 'float-medium 15s infinite',
         'float-fast': 'float-fast 12s infinite'
