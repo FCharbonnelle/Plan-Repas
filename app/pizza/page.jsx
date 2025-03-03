@@ -16,6 +16,7 @@ export default function Page() {
     const [isLoading, setIsLoading] = useState(true);
     const [addedToCartId, setAddedToCartId] = useState(null);
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [activeImageId, setActiveImageId] = useState(null);
     
     // Simuler un chargement initial
     useEffect(() => {
@@ -243,18 +244,39 @@ export default function Page() {
                                                 addedToCartId === pizza.id ? 'ring-2 ring-yellow-400' : ''
                                             }`}
                                         >
-                                            <div className="relative h-72 overflow-hidden">
+                                            <div 
+                                                className="relative h-80 overflow-hidden cursor-pointer"
+                                                onMouseEnter={() => setActiveImageId(pizza.id)}
+                                                onMouseLeave={() => setActiveImageId(null)}
+                                            >
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
-                                                <img 
+                                                <motion.img 
                                                     src={pizza.image} 
                                                     alt={pizza.name} 
-                                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110 brightness-110 contrast-110"
+                                                    className="w-full h-full object-cover brightness-110 contrast-110 saturate-110"
+                                                    initial={{ scale: 1 }}
+                                                    animate={{ 
+                                                        scale: activeImageId === pizza.id ? 1.15 : 1,
+                                                        filter: activeImageId === pizza.id ? 'brightness(1.2) contrast(1.1) saturate(1.2)' : 'brightness(1.1) contrast(1.1) saturate(1.1)'
+                                                    }}
+                                                    transition={{ duration: 0.7, ease: "easeOut" }}
                                                     onError={(e) => {
                                                         e.target.src = "/pizza/default-pizza.jpg";
                                                     }}
                                                 />
-                                                <div className="absolute inset-0 hover:bg-black/10 transition-all duration-300 z-5"></div>
-                                                <h3 className="absolute bottom-4 left-4 text-white font-bold text-2xl z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{pizza.name}</h3>
+                                                <div className={`absolute inset-0 transition-all duration-500 ${activeImageId === pizza.id ? 'bg-black/0' : 'bg-black/10'}`}></div>
+                                                <motion.div 
+                                                    className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent h-24 z-15"
+                                                    initial={{ opacity: 0.7 }}
+                                                    animate={{ opacity: activeImageId === pizza.id ? 0.9 : 0.7 }}
+                                                    transition={{ duration: 0.3 }}
+                                                ></motion.div>
+                                                <motion.h3 
+                                                    className="absolute bottom-4 left-4 text-white font-bold text-2xl z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
+                                                    initial={{ y: 0 }}
+                                                    animate={{ y: activeImageId === pizza.id ? -5 : 0 }}
+                                                    transition={{ duration: 0.3 }}
+                                                >{pizza.name}</motion.h3>
                                                 <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
                                                     {pizza.vegetarienne && (
                                                         <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full transition-all duration-300 hover:bg-green-600 shadow-md">
