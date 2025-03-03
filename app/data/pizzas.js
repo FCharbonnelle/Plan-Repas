@@ -6,6 +6,7 @@ export const pizzas = [
     description: "La classique italienne avec une base de sauce tomate, de la mozzarella fondante et du basilic frais.",
     price: 8.50,
     vegetarienne: true,
+    base: "Tomate",
     image: "/pizza/Margherita.jpeg"
   },
   {
@@ -15,6 +16,7 @@ export const pizzas = [
     description: "Un délicieux mélange de jambon et champignons frais sur une base de sauce tomate et mozzarella.",
     price: 10.00,
     vegetarienne: false,
+    base: "Tomate",
     image: "/pizza/Reine.jpeg"
   },
   {
@@ -24,6 +26,7 @@ export const pizzas = [
     description: "Pour les amateurs de fromage, un mélange savoureux de quatre fromages de caractère.",
     price: 12.00,
     vegetarienne: true,
+    base: "Tomate",
     image: "/pizza/4 fromages.jpeg"
   },
   {
@@ -33,6 +36,7 @@ export const pizzas = [
     description: "Une pizza gourmande aux saveurs de montagne avec du reblochon fondant et des lardons.",
     price: 13.50,
     vegetarienne: false,
+    base: "Crème",
     image: "/pizza/Savoyarde.webp"
   },
   {
@@ -42,6 +46,7 @@ export const pizzas = [
     description: "Garnie de légumes frais et colorés pour un repas savoureux et léger.",
     price: 11.00,
     vegetarienne: true,
+    base: "Tomate",
     image: "/pizza/Vegetarienne.jpg"
   },
   {
@@ -51,6 +56,7 @@ export const pizzas = [
     description: "Pizza repliée et farcie de jambon et d'œuf pour une expérience différente.",
     price: 11.50,
     vegetarienne: false,
+    base: "Tomate",
     image: "/pizza/Calzone.jpg"
   },
   {
@@ -60,6 +66,7 @@ export const pizzas = [
     description: "L'alliance sucrée-salée du jambon et de l'ananas pour une explosion de saveurs.",
     price: 10.50,
     vegetarienne: false,
+    base: "Tomate",
     image: "/pizza/Hawaienne.jpg"
   },
   {
@@ -69,6 +76,7 @@ export const pizzas = [
     description: "Une pizza raffinée à base de saumon frais et d'aneth sur un lit de crème.",
     price: 14.00,
     vegetarienne: false,
+    base: "Crème",
     image: "/pizza/Norvrgienne.jpg"
   },
   {
@@ -78,6 +86,7 @@ export const pizzas = [
     description: "Une pizza rustique et réconfortante avec des pommes de terre et des lardons.",
     price: 13.00,
     vegetarienne: false,
+    base: "Crème",
     image: "/pizza/Paysanne.jpg"
   },
   {
@@ -87,6 +96,7 @@ export const pizzas = [
     description: "Une pizza italienne traditionnelle avec un mélange savoureux d'artichauts et d'olives.",
     price: 12.50,
     vegetarienne: false,
+    base: "Tomate",
     image: "/pizza/Capricciosa.jpg"
   }
 ];
