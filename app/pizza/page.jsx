@@ -3,8 +3,10 @@ import Header from "../../components/ui/header";
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { ShoppingCart, X, Plus, Minus, Trash2, Filter } from "lucide-react";
 import { pizzas } from "../data/pizzas";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
+    const router = useRouter();
     const [cart, setCart] = useState([]);
     const [isCartOpen, setIsCartOpen] = useState(false);
     const [filterVegetarian, setFilterVegetarian] = useState(false);
@@ -108,6 +110,13 @@ export default function Page() {
                 return 0; // default: ne pas trier
             });
     }, [filterVegetarian, filterBase, sortBy]);
+
+    // Fonction pour rediriger vers la page de checkout
+    const goToCheckout = useCallback(() => {
+        if (cart.length > 0) {
+            router.push('/pizza/checkout');
+        }
+    }, [cart, router]);
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -314,7 +323,10 @@ export default function Page() {
                                         <span>Total:</span>
                                         <span>{calculateTotal()} €</span>
                                     </div>
-                                    <button className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-all duration-300 hover:shadow-lg active:scale-95">
+                                    <button 
+                                        onClick={goToCheckout}
+                                        className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-all duration-300 hover:shadow-lg active:scale-95"
+                                    >
                                         Commander
                                     </button>
                                 </div>

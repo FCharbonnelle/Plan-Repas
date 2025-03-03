@@ -1,4 +1,5 @@
 "use client"
+import Link from 'next/link';
 
 function Header() {
     return (
@@ -11,16 +12,18 @@ function Header() {
             </div>
             <div className="absolute inset-0 bg-black/50"></div>
             <div className="container mx-auto px-4 relative z-10 flex flex-col items-center justify-center h-full">
-                <div className="bg-black/30 p-6 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg transform hover:scale-105 transition-transform duration-300">
-                    <h1 className="text-5xl md:text-6xl font-extrabold text-white text-center tracking-wider mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-serif">
-                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 animate-text">
-                            Pizza Di Mama
-                        </span>
-                    </h1>
-                    <p className="text-white text-xl italic opacity-90 text-center">
-                        Les meilleures pizzas de la ville
-                    </p>
-                </div>
+                <Link href="/pizza" className="block">
+                    <div className="bg-black/30 p-6 rounded-xl backdrop-blur-sm border border-white/20 shadow-lg transform hover:scale-105 transition-transform duration-300 cursor-pointer">
+                        <h1 className="text-5xl md:text-6xl font-extrabold text-white text-center tracking-wider mb-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] font-serif">
+                            <span className="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 via-red-500 to-yellow-400 animate-text">
+                                Pizza Di Mama
+                            </span>
+                        </h1>
+                        <p className="text-white text-xl italic opacity-90 text-center">
+                            Les meilleures pizzas de la ville
+                        </p>
+                    </div>
+                </Link>
             </div>
         </header>
     )
