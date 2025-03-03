@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../components/ui/header";
 import { v4 as uuidv4 } from 'uuid';
+import { motion } from 'framer-motion';
+import { CreditCard, Banknote, ArrowLeft, ShoppingBag, Loader2 } from 'lucide-react';
 
 export default function Checkout() {
     const router = useRouter();
@@ -86,6 +88,26 @@ export default function Checkout() {
         }
     };
     
+    // Variants pour les animations
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { 
+            opacity: 1,
+            transition: { 
+                staggerChildren: 0.1
+            }
+        }
+    };
+    
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { 
+            y: 0, 
+            opacity: 1,
+            transition: { type: "spring", stiffness: 100 }
+        }
+    };
+    
     return (
         <div className="flex flex-col min-h-screen">
             <Header />
@@ -95,28 +117,77 @@ export default function Checkout() {
                 backgroundPosition: "center",
                 backgroundAttachment: "fixed"
             }}>
-                <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
                 <div className="container mx-auto relative z-10 py-8 px-4">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-xl transition-all duration-300">
-                        <h2 className="text-3xl font-bold text-white mb-6 text-center">Récapitulatif de votre commande</h2>
-                        <p className="text-white text-center mb-6">Commande #{orderId}</p>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl transition-all duration-300 max-w-6xl mx-auto"
+                    >
+                        <div className="flex items-center justify-between mb-8">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => router.push('/pizza')}
+                                className="flex items-center gap-2 text-white hover:text-yellow-300 transition-colors"
+                            >
+                                <ArrowLeft size={20} />
+                                <span>Retour</span>
+                            </motion.button>
+                            
+                            <h2 className="text-3xl md:text-4xl font-bold text-white text-center">Finaliser votre commande</h2>
+                            
+                            <div className="w-24"></div> {/* Spacer pour centrer le titre */}
+                        </div>
+                        
+                        <div className="flex items-center justify-center mb-4">
+                            <div className="flex items-center text-white">
+                                <ShoppingBag className="mr-2" size={20} />
+                                <p className="text-lg">Commande #{orderId}</p>
+                            </div>
+                        </div>
                         
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             {/* Récapitulatif du panier */}
-                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-white/30">
-                                <h3 className="text-xl font-bold text-white mb-4">Votre panier</h3>
+                            <motion.div 
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="bg-white/20 backdrop-blur-md rounded-xl p-6 border border-white/30 shadow-lg"
+                            >
+                                <h3 className="text-xl font-bold text-white mb-4 flex items-center">
+                                    <ShoppingBag size={20} className="mr-2" />
+                                    Votre panier
+                                </h3>
                                 
-                                <div className="max-h-80 overflow-y-auto mb-4">
+                                <div className="max-h-80 overflow-y-auto mb-4 pr-2 custom-scrollbar">
                                     {cart.length > 0 ? (
                                         <ul className="divide-y divide-white/20">
                                             {cart.map((item) => (
-                                                <li key={item.id} className="py-3 flex justify-between items-center">
-                                                    <div>
-                                                        <h4 className="font-medium text-white">{item.name}</h4>
-                                                        <p className="text-sm text-white/80">{item.quantity} x {item.price.toFixed(2)} €</p>
+                                                <motion.li 
+                                                    key={item.id} 
+                                                    variants={itemVariants}
+                                                    className="py-3 flex justify-between items-center"
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-12 h-12 rounded-md overflow-hidden bg-white/10">
+                                                            <img 
+                                                                src={item.image} 
+                                                                alt={item.name} 
+                                                                className="w-full h-full object-cover"
+                                                                onError={(e) => {
+                                                                    e.target.src = "/pizza/default-pizza.jpg";
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-medium text-white">{item.name}</h4>
+                                                            <p className="text-sm text-white/80">{item.quantity} x {item.price.toFixed(2)} €</p>
+                                                        </div>
                                                     </div>
                                                     <p className="text-white font-bold">{(item.price * item.quantity).toFixed(2)} €</p>
-                                                </li>
+                                                </motion.li>
                                             ))}
                                         </ul>
                                     ) : (
@@ -133,20 +204,25 @@ export default function Checkout() {
                                         <span>Frais de livraison:</span>
                                         <span>2.50 €</span>
                                     </div>
-                                    <div className="flex justify-between font-bold text-white text-xl mt-4">
+                                    <div className="flex justify-between font-bold text-white text-xl mt-4 bg-white/10 p-3 rounded-lg">
                                         <span>Total:</span>
                                         <span>{(parseFloat(calculateTotal()) + 2.50).toFixed(2)} €</span>
                                     </div>
                                 </div>
-                            </div>
+                            </motion.div>
                             
                             {/* Formulaire client */}
-                            <div className="bg-white/20 backdrop-blur-md rounded-lg p-6 border border-white/30">
+                            <motion.div 
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                                className="bg-white/20 backdrop-blur-md rounded-xl p-6 border border-white/30 shadow-lg"
+                            >
                                 <h3 className="text-xl font-bold text-white mb-4">Vos informations</h3>
                                 
                                 <form onSubmit={handleSubmit} className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
+                                        <motion.div variants={itemVariants}>
                                             <label htmlFor="firstName" className="block text-white text-sm font-medium mb-1">Prénom</label>
                                             <input 
                                                 type="text" 
@@ -155,10 +231,11 @@ export default function Checkout() {
                                                 value={formData.firstName} 
                                                 onChange={handleChange} 
                                                 required 
-                                                className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                                className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                                placeholder="Votre prénom"
                                             />
-                                        </div>
-                                        <div>
+                                        </motion.div>
+                                        <motion.div variants={itemVariants}>
                                             <label htmlFor="lastName" className="block text-white text-sm font-medium mb-1">Nom</label>
                                             <input 
                                                 type="text" 
@@ -167,12 +244,13 @@ export default function Checkout() {
                                                 value={formData.lastName} 
                                                 onChange={handleChange} 
                                                 required 
-                                                className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                                className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                                placeholder="Votre nom"
                                             />
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     
-                                    <div>
+                                    <motion.div variants={itemVariants}>
                                         <label htmlFor="email" className="block text-white text-sm font-medium mb-1">Email</label>
                                         <input 
                                             type="email" 
@@ -181,11 +259,12 @@ export default function Checkout() {
                                             value={formData.email} 
                                             onChange={handleChange} 
                                             required 
-                                            className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                            className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                            placeholder="votre@email.com"
                                         />
-                                    </div>
+                                    </motion.div>
                                     
-                                    <div>
+                                    <motion.div variants={itemVariants}>
                                         <label htmlFor="phone" className="block text-white text-sm font-medium mb-1">Téléphone</label>
                                         <input 
                                             type="tel" 
@@ -194,11 +273,12 @@ export default function Checkout() {
                                             value={formData.phone} 
                                             onChange={handleChange} 
                                             required 
-                                            className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                            className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                            placeholder="06 12 34 56 78"
                                         />
-                                    </div>
+                                    </motion.div>
                                     
-                                    <div>
+                                    <motion.div variants={itemVariants}>
                                         <label htmlFor="address" className="block text-white text-sm font-medium mb-1">Adresse</label>
                                         <input 
                                             type="text" 
@@ -207,12 +287,13 @@ export default function Checkout() {
                                             value={formData.address} 
                                             onChange={handleChange} 
                                             required 
-                                            className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                            className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                            placeholder="123 rue de la Pizza"
                                         />
-                                    </div>
+                                    </motion.div>
                                     
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
+                                        <motion.div variants={itemVariants}>
                                             <label htmlFor="postalCode" className="block text-white text-sm font-medium mb-1">Code postal</label>
                                             <input 
                                                 type="text" 
@@ -221,10 +302,11 @@ export default function Checkout() {
                                                 value={formData.postalCode} 
                                                 onChange={handleChange} 
                                                 required 
-                                                className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                                className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                                placeholder="75000"
                                             />
-                                        </div>
-                                        <div>
+                                        </motion.div>
+                                        <motion.div variants={itemVariants}>
                                             <label htmlFor="city" className="block text-white text-sm font-medium mb-1">Ville</label>
                                             <input 
                                                 type="text" 
@@ -233,15 +315,16 @@ export default function Checkout() {
                                                 value={formData.city} 
                                                 onChange={handleChange} 
                                                 required 
-                                                className="w-full bg-white/10 border border-white/30 rounded-md px-3 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
+                                                className="w-full bg-white/10 border border-white/30 rounded-lg px-4 py-2 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-yellow-500/50"
+                                                placeholder="Paris"
                                             />
-                                        </div>
+                                        </motion.div>
                                     </div>
                                     
-                                    <div>
-                                        <label className="block text-white text-sm font-medium mb-1">Méthode de paiement</label>
+                                    <motion.div variants={itemVariants}>
+                                        <label className="block text-white text-sm font-medium mb-2">Méthode de paiement</label>
                                         <div className="grid grid-cols-2 gap-4 mt-2">
-                                            <label className={`flex items-center justify-center p-3 border rounded-md cursor-pointer transition-all duration-300 ${formData.paymentMethod === 'card' ? 'bg-red-600 border-white' : 'bg-white/10 border-white/30 hover:bg-white/20'}`}>
+                                            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-300 ${formData.paymentMethod === 'card' ? 'bg-red-600 border-white shadow-lg' : 'bg-white/10 border-white/30 hover:bg-white/20'}`}>
                                                 <input 
                                                     type="radio" 
                                                     name="paymentMethod" 
@@ -250,9 +333,12 @@ export default function Checkout() {
                                                     onChange={handleChange} 
                                                     className="sr-only"
                                                 />
-                                                <span className="text-white">Carte bancaire</span>
+                                                <div className="flex flex-col items-center">
+                                                    <CreditCard size={24} className="text-white mb-2" />
+                                                    <span className="text-white text-sm">Carte bancaire</span>
+                                                </div>
                                             </label>
-                                            <label className={`flex items-center justify-center p-3 border rounded-md cursor-pointer transition-all duration-300 ${formData.paymentMethod === 'cash' ? 'bg-red-600 border-white' : 'bg-white/10 border-white/30 hover:bg-white/20'}`}>
+                                            <label className={`flex items-center justify-center p-4 border rounded-lg cursor-pointer transition-all duration-300 ${formData.paymentMethod === 'cash' ? 'bg-red-600 border-white shadow-lg' : 'bg-white/10 border-white/30 hover:bg-white/20'}`}>
                                                 <input 
                                                     type="radio" 
                                                     name="paymentMethod" 
@@ -261,34 +347,37 @@ export default function Checkout() {
                                                     onChange={handleChange} 
                                                     className="sr-only"
                                                 />
-                                                <span className="text-white">Espèces à la livraison</span>
+                                                <div className="flex flex-col items-center">
+                                                    <Banknote size={24} className="text-white mb-2" />
+                                                    <span className="text-white text-sm">Espèces à la livraison</span>
+                                                </div>
                                             </label>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                     
-                                    <div className="flex justify-end mt-6">
+                                    <motion.div 
+                                        variants={itemVariants}
+                                        className="pt-4"
+                                    >
                                         <button 
                                             type="submit" 
                                             disabled={isSubmitting}
-                                            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-md transition-all duration-300 hover:shadow-lg active:scale-95 flex items-center justify-center disabled:opacity-70 disabled:cursor-not-allowed"
+                                            className={`w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-lg transition-all duration-300 shadow-lg font-medium flex items-center justify-center ${isSubmitting ? 'opacity-70' : 'hover:from-red-700 hover:to-red-600'}`}
                                         >
                                             {isSubmitting ? (
                                                 <>
-                                                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
+                                                    <Loader2 size={20} className="animate-spin mr-2" />
                                                     Traitement en cours...
                                                 </>
                                             ) : (
                                                 'Valider et payer'
                                             )}
                                         </button>
-                                    </div>
+                                    </motion.div>
                                 </form>
-                            </div>
+                            </motion.div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
             </main>
         </div>

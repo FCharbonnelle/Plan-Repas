@@ -1,9 +1,10 @@
 "use client"
 import Header from "../../components/ui/header";
 import { useState, useCallback, useMemo, useEffect } from "react";
-import { ShoppingCart, X, Plus, Minus, Trash2, Filter } from "lucide-react";
+import { ShoppingCart, X, Plus, Minus, Trash2, Filter, ChevronUp } from "lucide-react";
 import { pizzas } from "../data/pizzas";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Page() {
     const router = useRouter();
@@ -14,6 +15,7 @@ export default function Page() {
     const [sortBy, setSortBy] = useState("default"); // default, price-asc, price-desc
     const [isLoading, setIsLoading] = useState(true);
     const [addedToCartId, setAddedToCartId] = useState(null);
+    const [showScrollTop, setShowScrollTop] = useState(false);
     
     // Simuler un chargement initial
     useEffect(() => {
@@ -23,6 +25,24 @@ export default function Page() {
         
         return () => clearTimeout(timer);
     }, []);
+    
+    // Détecter le défilement pour afficher le bouton de retour en haut
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 300);
+        };
+        
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+    
+    // Fonction pour remonter en haut de la page
+    const scrollToTop = () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
     
     // Persister le panier dans le localStorage
     useEffect(() => {
@@ -99,6 +119,13 @@ export default function Page() {
         return cart.reduce((total, item) => total + item.quantity, 0);
     }, [cart]);
     
+    // Fonction pour rediriger vers la page de checkout
+    const goToCheckout = useCallback(() => {
+        if (cart.length > 0) {
+            router.push('/pizza/checkout');
+        }
+    }, [cart, router]);
+    
     // Filtrer et trier les pizzas (memoized pour éviter des recalculs inutiles)
     const filteredPizzas = useMemo(() => {
         return pizzas
@@ -111,12 +138,25 @@ export default function Page() {
             });
     }, [filterVegetarian, filterBase, sortBy]);
 
-    // Fonction pour rediriger vers la page de checkout
-    const goToCheckout = useCallback(() => {
-        if (cart.length > 0) {
-            router.push('/pizza/checkout');
+    // Variants pour les animations
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: { 
+            opacity: 1,
+            transition: { 
+                staggerChildren: 0.1
+            }
         }
-    }, [cart, router]);
+    };
+    
+    const itemVariants = {
+        hidden: { y: 20, opacity: 0 },
+        visible: { 
+            y: 0, 
+            opacity: 1,
+            transition: { type: "spring", stiffness: 100 }
+        }
+    };
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -127,33 +167,40 @@ export default function Page() {
                 backgroundPosition: "center",
                 backgroundAttachment: "fixed"
             }}>
-                <div className="absolute inset-0 bg-black/30 backdrop-blur-[2px]"></div>
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
                 <div className="container mx-auto relative z-10 py-8 px-4">
                     {/* Contenu principal ici */}
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 shadow-xl transition-all duration-300">
-                        <h2 className="text-3xl font-bold text-white mb-6 text-center">Nos Délicieuses Pizzas</h2>
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5 }}
+                        className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-8 shadow-2xl transition-all duration-300"
+                    >
+                        <h2 className="text-4xl font-bold text-white mb-8 text-center">Nos Délicieuses Pizzas</h2>
                         
                         {/* Filtres et tri */}
-                        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
+                        <div className="flex flex-wrap justify-between items-center mb-8 gap-4 bg-black/20 p-4 rounded-xl backdrop-blur-sm">
                             <div className="flex flex-wrap items-center gap-3">
-                                <button 
+                                <motion.button 
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
                                     onClick={() => setFilterVegetarian(!filterVegetarian)}
                                     className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-300 ${
                                         filterVegetarian 
-                                            ? 'bg-green-600 text-white shadow-lg scale-105' 
-                                            : 'bg-white/20 text-white hover:bg-white/30 hover:scale-105'
+                                            ? 'bg-green-600 text-white shadow-lg' 
+                                            : 'bg-white/20 text-white hover:bg-white/30'
                                     }`}
                                 >
                                     <Filter size={16} />
                                     {filterVegetarian ? 'Végétariennes uniquement' : 'Toutes les pizzas'}
-                                </button>
+                                </motion.button>
                                 
                                 <div className="flex items-center gap-2">
                                     <span className="text-white">Base:</span>
                                     <select 
                                         value={filterBase}
                                         onChange={(e) => setFilterBase(e.target.value)}
-                                        className="bg-white/20 text-white border border-white/30 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/30"
+                                        className="bg-white/20 text-white border border-white/30 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/30"
                                     >
                                         <option value="all">Toutes</option>
                                         <option value="Tomate">Tomate</option>
@@ -167,7 +214,7 @@ export default function Page() {
                                 <select 
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="bg-white/20 text-white border border-white/30 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/30"
+                                    className="bg-white/20 text-white border border-white/30 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-white/50 transition-all duration-300 hover:bg-white/30"
                                 >
                                     <option value="default">Par défaut</option>
                                     <option value="price-asc">Prix croissant</option>
@@ -182,32 +229,39 @@ export default function Page() {
                             </div>
                         ) : (
                             <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <motion.div 
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                                >
                                     {filteredPizzas.map((pizza) => (
-                                        <div 
+                                        <motion.div 
                                             key={pizza.id} 
-                                            className={`bg-white/20 backdrop-blur-md rounded-lg overflow-hidden border border-white/30 shadow-lg transition-all duration-300 hover:shadow-xl ${
-                                                addedToCartId === pizza.id ? 'scale-105 ring-2 ring-yellow-400' : 'hover:scale-105'
+                                            variants={itemVariants}
+                                            className={`bg-white/20 backdrop-blur-md rounded-xl overflow-hidden border border-white/30 shadow-xl transition-all duration-300 hover:shadow-2xl ${
+                                                addedToCartId === pizza.id ? 'ring-2 ring-yellow-400' : ''
                                             }`}
                                         >
-                                            <div className="relative h-48 overflow-hidden">
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent z-10"></div>
+                                            <div className="relative h-72 overflow-hidden">
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent z-10"></div>
                                                 <img 
                                                     src={pizza.image} 
                                                     alt={pizza.name} 
-                                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
+                                                    className="w-full h-full object-cover transition-transform duration-700 hover:scale-110 brightness-110 contrast-110"
                                                     onError={(e) => {
                                                         e.target.src = "/pizza/default-pizza.jpg";
                                                     }}
                                                 />
-                                                <h3 className="absolute bottom-2 left-3 text-white font-bold text-xl z-20">{pizza.name}</h3>
-                                                <div className="absolute top-2 right-2 flex flex-col gap-2 z-20">
+                                                <div className="absolute inset-0 hover:bg-black/10 transition-all duration-300 z-5"></div>
+                                                <h3 className="absolute bottom-4 left-4 text-white font-bold text-2xl z-20 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">{pizza.name}</h3>
+                                                <div className="absolute top-4 right-4 flex flex-col gap-2 z-20">
                                                     {pizza.vegetarienne && (
-                                                        <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full transition-all duration-300 hover:bg-green-600">
+                                                        <span className="bg-green-500 text-white text-xs font-bold px-3 py-1 rounded-full transition-all duration-300 hover:bg-green-600 shadow-md">
                                                             Végétarien
                                                         </span>
                                                     )}
-                                                    <span className={`text-white text-xs font-bold px-2 py-1 rounded-full transition-all duration-300 ${
+                                                    <span className={`text-white text-xs font-bold px-3 py-1 rounded-full transition-all duration-300 shadow-md ${
                                                         pizza.base === "Tomate" 
                                                             ? "bg-red-500 hover:bg-red-600" 
                                                             : "bg-yellow-500 hover:bg-yellow-600"
@@ -216,26 +270,28 @@ export default function Page() {
                                                     </span>
                                                 </div>
                                             </div>
-                                            <div className="p-4">
-                                                <p className="text-white text-sm mb-3">{pizza.description}</p>
-                                                <div className="mb-3">
-                                                    <h4 className="text-white text-sm font-semibold mb-1">Ingrédients:</h4>
+                                            <div className="p-5">
+                                                <p className="text-white text-sm mb-4 leading-relaxed">{pizza.description}</p>
+                                                <div className="mb-4">
+                                                    <h4 className="text-white text-sm font-semibold mb-2">Ingrédients:</h4>
                                                     <p className="text-white/80 text-sm">{pizza.ingredients.join(", ")}</p>
                                                 </div>
                                                 <div className="flex justify-between items-center mt-4">
-                                                    <span className="text-white font-bold text-xl">{pizza.price.toFixed(2)} €</span>
-                                                    <button 
+                                                    <span className="text-white font-bold text-2xl">{pizza.price.toFixed(2)} €</span>
+                                                    <motion.button 
+                                                        whileHover={{ scale: 1.05 }}
+                                                        whileTap={{ scale: 0.95 }}
                                                         onClick={() => addToCart(pizza)}
-                                                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition-all duration-300 hover:shadow-lg hover:scale-105 active:scale-95 flex items-center gap-2"
+                                                        className={`${addedToCartId === pizza.id ? 'bg-green-600' : 'bg-red-600 hover:bg-red-700'} text-white px-5 py-2 rounded-lg transition-all duration-300 shadow-lg flex items-center gap-2`}
                                                     >
-                                                        <ShoppingCart size={16} />
+                                                        <ShoppingCart size={18} />
                                                         {addedToCartId === pizza.id ? 'Ajouté !' : 'Ajouter'}
-                                                    </button>
+                                                    </motion.button>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </motion.div>
                                     ))}
-                                </div>
+                                </motion.div>
                                 
                                 {filteredPizzas.length === 0 && (
                                     <div className="text-center py-10 animate-fade-in">
@@ -244,95 +300,139 @@ export default function Page() {
                                 )}
                             </>
                         )}
-                    </div>
+                    </motion.div>
                 </div>
                 
+                {/* Bouton de retour en haut */}
+                <AnimatePresence>
+                    {showScrollTop && (
+                        <motion.button
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            onClick={scrollToTop}
+                            className="fixed bottom-24 right-4 z-40 w-12 h-12 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center shadow-lg hover:bg-white/30 transition-all duration-300 border border-white/30"
+                            aria-label="Retour en haut"
+                        >
+                            <ChevronUp size={24} />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
+                
                 {/* Panier fixe */}
-                <div className={`fixed bottom-4 right-4 z-50 transition-all duration-500 ${isCartOpen ? 'w-80' : 'w-16'}`}>
+                <div className={`fixed bottom-4 right-4 z-50 transition-all duration-500 ${isCartOpen ? 'w-96' : 'w-16'}`}>
                     {/* Bouton du panier */}
-                    <button 
+                    <motion.button 
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                         onClick={toggleCart}
-                        className="absolute bottom-0 right-0 w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-lg hover:bg-red-700 transition-all duration-300 hover:scale-110 active:scale-95"
+                        className="absolute bottom-0 right-0 w-16 h-16 rounded-full bg-red-600 text-white flex items-center justify-center shadow-xl hover:bg-red-700 transition-all duration-300"
                         aria-label="Panier"
                     >
                         <div className="relative">
                             <ShoppingCart size={24} className={`transition-transform duration-300 ${isCartOpen ? 'rotate-12' : ''}`} />
                             {totalItems > 0 && (
-                                <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce">
+                                <span className="absolute -top-2 -right-2 bg-yellow-500 text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-bounce shadow-md">
                                     {totalItems}
                                 </span>
                             )}
                         </div>
-                    </button>
+                    </motion.button>
                     
                     {/* Contenu du panier */}
-                    {isCartOpen && (
-                        <div className="bg-white rounded-lg shadow-xl overflow-hidden mb-16 animate-slide-up">
-                            <div className="bg-red-600 text-white p-3 flex justify-between items-center">
-                                <h3 className="font-bold">Votre Panier</h3>
-                                <button onClick={toggleCart} className="text-white hover:text-gray-200 transition-colors">
-                                    <X size={20} />
-                                </button>
-                            </div>
-                            
-                            <div className="max-h-80 overflow-y-auto p-3">
-                                {cart.length === 0 ? (
-                                    <p className="text-gray-500 text-center py-4">Votre panier est vide</p>
-                                ) : (
-                                    <ul className="divide-y divide-gray-200">
-                                        {cart.map((item) => (
-                                            <li key={item.id} className="py-3 flex justify-between items-center hover:bg-gray-50 transition-colors rounded-md px-2">
-                                                <div>
-                                                    <h4 className="font-medium">{item.name}</h4>
-                                                    <p className="text-sm text-gray-600">{(item.price * item.quantity).toFixed(2)} €</p>
-                                                </div>
-                                                <div className="flex items-center space-x-2">
-                                                    <button 
-                                                        onClick={() => updateQuantity(item.id, -1)}
-                                                        disabled={item.quantity <= 1}
-                                                        className="text-gray-500 hover:text-red-600 disabled:opacity-50 transition-colors"
-                                                        aria-label="Diminuer la quantité"
-                                                    >
-                                                        <Minus size={16} />
-                                                    </button>
-                                                    <span className="w-6 text-center">{item.quantity}</span>
-                                                    <button 
-                                                        onClick={() => updateQuantity(item.id, 1)}
-                                                        className="text-gray-500 hover:text-green-600 transition-colors"
-                                                        aria-label="Augmenter la quantité"
-                                                    >
-                                                        <Plus size={16} />
-                                                    </button>
-                                                    <button 
-                                                        onClick={() => removeFromCart(item.id)}
-                                                        className="text-gray-500 hover:text-red-600 ml-2 transition-colors"
-                                                        aria-label="Supprimer du panier"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
-                            
-                            {cart.length > 0 && (
-                                <div className="border-t border-gray-200 p-3">
-                                    <div className="flex justify-between font-bold mb-4">
-                                        <span>Total:</span>
-                                        <span>{calculateTotal()} €</span>
-                                    </div>
-                                    <button 
-                                        onClick={goToCheckout}
-                                        className="w-full bg-red-600 text-white py-2 rounded-md hover:bg-red-700 transition-all duration-300 hover:shadow-lg active:scale-95"
+                    <AnimatePresence>
+                        {isCartOpen && (
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.9, y: 10 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 10 }}
+                                className="bg-white/10 backdrop-blur-md rounded-xl shadow-2xl overflow-hidden mb-16 border border-white/20"
+                            >
+                                <div className="bg-gradient-to-r from-red-700 to-red-600 text-white p-4 flex justify-between items-center">
+                                    <h3 className="font-bold text-lg">Votre Panier</h3>
+                                    <motion.button 
+                                        whileHover={{ scale: 1.1 }}
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={toggleCart} 
+                                        className="text-white hover:text-gray-200 transition-colors"
                                     >
-                                        Commander
-                                    </button>
+                                        <X size={20} />
+                                    </motion.button>
                                 </div>
-                            )}
-                        </div>
-                    )}
+                                
+                                <div className="max-h-96 overflow-y-auto p-4">
+                                    {cart.length === 0 ? (
+                                        <p className="text-white text-center py-6 italic">Votre panier est vide</p>
+                                    ) : (
+                                        <ul className="divide-y divide-white/10">
+                                            {cart.map((item) => (
+                                                <motion.li 
+                                                    key={item.id} 
+                                                    initial={{ opacity: 0 }}
+                                                    animate={{ opacity: 1 }}
+                                                    exit={{ opacity: 0 }}
+                                                    className="py-3 flex justify-between items-center hover:bg-white/10 transition-colors rounded-md px-3"
+                                                >
+                                                    <div>
+                                                        <h4 className="font-medium text-white">{item.name}</h4>
+                                                        <p className="text-sm text-white/80">{(item.price * item.quantity).toFixed(2)} €</p>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <motion.button 
+                                                            whileHover={{ scale: 1.2 }}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => updateQuantity(item.id, -1)}
+                                                            disabled={item.quantity <= 1}
+                                                            className="text-white/80 hover:text-red-400 disabled:opacity-50 transition-colors"
+                                                            aria-label="Diminuer la quantité"
+                                                        >
+                                                            <Minus size={16} />
+                                                        </motion.button>
+                                                        <span className="w-6 text-center text-white">{item.quantity}</span>
+                                                        <motion.button 
+                                                            whileHover={{ scale: 1.2 }}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => updateQuantity(item.id, 1)}
+                                                            className="text-white/80 hover:text-green-400 transition-colors"
+                                                            aria-label="Augmenter la quantité"
+                                                        >
+                                                            <Plus size={16} />
+                                                        </motion.button>
+                                                        <motion.button 
+                                                            whileHover={{ scale: 1.2 }}
+                                                            whileTap={{ scale: 0.9 }}
+                                                            onClick={() => removeFromCart(item.id)}
+                                                            className="text-white/80 hover:text-red-400 ml-2 transition-colors"
+                                                            aria-label="Supprimer du panier"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </motion.button>
+                                                    </div>
+                                                </motion.li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                                
+                                {cart.length > 0 && (
+                                    <div className="border-t border-white/20 p-4">
+                                        <div className="flex justify-between font-bold mb-4 text-white">
+                                            <span>Total:</span>
+                                            <span>{calculateTotal()} €</span>
+                                        </div>
+                                        <motion.button 
+                                            whileHover={{ scale: 1.03 }}
+                                            whileTap={{ scale: 0.97 }}
+                                            onClick={goToCheckout}
+                                            className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white py-3 rounded-lg hover:from-red-700 hover:to-red-600 transition-all duration-300 shadow-lg font-medium"
+                                        >
+                                            Commander
+                                        </motion.button>
+                                    </div>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </main>
         </div>
