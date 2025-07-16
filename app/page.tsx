@@ -465,8 +465,8 @@ export default function Home() {
         <div className="w-full max-w-[95%] mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button 
-                variant="secondary" 
+              <Button
+                variant="secondary"
                 rounded="lg"
                 className="bg-white/90 hover:bg-white text-indigo-600"
               >
@@ -474,7 +474,11 @@ export default function Home() {
                 Ajouter une recette
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px] bg-gradient-to-b from-white to-indigo-50/30 border-2 border-indigo-200">
+            <DialogContent
+              className="sm:max-w-[425px] bg-gradient-to-b from-white to-indigo-50/30 border-2 border-indigo-200"
+              disableOutsideClose
+              hideCloseButton
+            >
               <DialogHeader>
                 <DialogTitle className="text-2xl gradient-heading">
                   {editingRecipe ? "Modifier la recette" : "Nouvelle Recette"}
